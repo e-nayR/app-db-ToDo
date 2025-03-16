@@ -17,9 +17,6 @@ function dbConn() {
 // $query = "INSERT INTO tag(id, titulo) VALUES ($tag_titulo);"
 // $query = "INSERT INTO tarefa(id, titulo, data_criado, data_final, entrege, tag) VALUES ($tarefa_titulo, $criado, $final, $entrege, $tag);"
 
-// $query = "SELECT * FROM tarefa;"
-// $query = "SELECT * FROM tarefa WHERE tag=$tag_id"
-
 // $query = "UPDATE tarefa SET $campo = $valor WHERE id=$id;"
 // $query = "UPDATE tag SET titulo = $valor WHERE id=$id;"
 
@@ -28,13 +25,40 @@ function dbConn() {
 
 function consultarTarefas($conn) {
     try{
-        $query = "SELECT t.titulo as titulo, t.data_criado as criado, ta.titulo as tag FROM tarefa as t JOIN tag as ta ON ta.id = t.tag;";
+        $query = "SELECT t.id as id, t.titulo as titulo, t.data_final as data_final, ta.titulo as tag FROM tarefa as t JOIN tag as ta ON ta.id = t.tag ORDER BY data_final DESC;";
         $tarefas = [];
         $result = pg_query($conn, $query);
         while ($row = pg_fetch_assoc($result)) {
             $tarefas[] = $row;
         }
-        // pg_close($conn);
+        return $tarefas;
+    } catch(Exception $e) {
+        echo "Erro: " . $e->getMessage();
+    }
+};
+
+function consultarTags($conn) {
+    try{
+        $query = "SELECT * FROM tag;";
+        $tags = [];
+        $result = pg_query($conn, $query);
+        while ($row = pg_fetch_assoc($result)) {
+            $tags[] = $row;
+        }
+        return $tags;
+    } catch(Exception $e) {
+        echo "Erro: " . $e->getMessage();
+    }
+};
+
+function consultarPorCategoria($conn,$tag_id) {
+    try{
+        $query = "SELECT t.id as id, t.titulo as titulo, t.data_final as data_final FROM tarefa as t WHERE tag=$tag_id ORDER BY data_final DESC;";
+        $tarefas = [];
+        $result = pg_query($conn, $query);
+        while ($row = pg_fetch_assoc($result)) {
+            $tarefas[] = $row;
+        }
         return $tarefas;
     } catch(Exception $e) {
         echo "Erro: " . $e->getMessage();

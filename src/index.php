@@ -6,21 +6,13 @@
     <title>To Do</title>
     <link rel="icon" type="image/png" href="./favicon.png">
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 </head>
 <style>
-body{padding-top:20px;
-background-color:#f1f5f9;
-}
-.card {
-    border: 0;
-    border-radius: 0.5rem;
-    box-shadow: 0 2px 4px rgba(0,0,20,.08), 0 1px 2px rgba(0,0,20,.08);
-}
-.rounded-bottom {
-    border-bottom-left-radius: 0.375rem !important;
-    border-bottom-right-radius: 0.375rem !important;
+body {
+    padding-top: 20px;
+    background-color: #f1f5f9;
 }
 </style>
 <?php
@@ -28,63 +20,175 @@ include 'functions.php';
 
 $conn = dbConn();
 $tarefas = consultarTarefas($conn);
+$tags = consultarTags($conn);
 ?>
 <body>
     <div class="container">
-        <div class="py-6">
+        <div class="py-4">
             <div class="row">
-                <div class="offset-lg-1 col-lg-10 col-md-12 col-12">
-                    <div class="row align-items-center mb-4">
-                        <div class="d-flex justify-content-between
-                        align-items-center">
-                            <form>
-                                <input type="text" class="form-control form-control-lg" placeholder="Nova tarefa">
-                            </form>
-                            <div>
-                                <button  type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-success">Adicionar</button>
+                <div class="offset-lg-1 col-lg-10 col-md-12">
+                    <div class="row align-items-center mb-2">
+                        <form method="POST" class="row gy-2 gx-3 align-items-center">
+                            <div class="col-auto">
+                                <input type="text" class="form-control" id="titulo_tarefa" name="titulo_tarefa" placeholder="Título da Tarefa" required>
                             </div>
-                        </div>
+                            <div class="col-auto">
+                                <label class="text-secondary">Categoria</label>
+                                <select class="form-select" id="categoria" name="categoria">
+                                    <option value="0">Selecione</option>
+                                <?php foreach ($tags as $tag) : ?>
+                                    <option value="<?php echo $tag['id'] ?>"><?php echo $tag['titulo'] ?></option>
+                                <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="col-auto">
+                                <label class="text-secondary">Data final</label>
+                                <input type="date" class="form-control" id="data_final" name="data_final">
+                            </div>
+                            <div class="col-auto">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="status_tarefa" name="status_tarefa">
+                                    <label class="form-check-label" for="status_tarefa">Concluída</label>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <button type="submit" class="btn btn-success" id="criar-tarefa" name="criar-tarefa">Criar</button>
+                            </div>
+                        </form>
                     </div>
-                    <ul class="nav nav-tabs mb-4" id="ex1" role="tablist">
-                        <li class="nav-item" role="presentation">
-                          <a class="nav-link" id="ex1-tab-2" data-mdb-tab-init="" href="" role="tab" aria-controls="ex1-tabs-2" aria-selected="false" tabindex="-1">Todas</a>
+
+                    <!-- tipos de listagem -->
+                    <ul class="nav nav-tabs mb-4">
+                        <li class="nav-item">
+                            <button class="nav-link active" id="lista-todas" data-bs-toggle="tab" data-bs-target="#tarefas">Todas</button>
                         </li>
-                        <li class="nav-item" role="presentation">
-                          <a class="nav-link" id="ex1-tab-3" data-mdb-tab-init="" href="" role="tab" aria-controls="ex1-tabs-3" aria-selected="false" tabindex="-1">Por categoria</a>
+                        <li class="nav-item">
+                            <button class="nav-link" id="lista-categoria" data-bs-toggle="tab" data-bs-target="#categoria-tarefas">Por categoria</button>
                         </li>
                     </ul>
 
-                    <div class="mb-8">
-                        <div class="card md-6">
-                            <ul class="list-group list-group-flush">
-                                <?php foreach ($tarefas as $tarefa) : ?>
-                                <li class="list-group-item p-2">
-                                    <div class="d-flex justify-content-between
-                                        align-items-center">
-                                        <div class="d-flex align-items-center">
-                                            <div class="form-check">
-                                                <input class="form-check-input me-0" type="checkbox" value="" id="flexCheckChecked1" aria-label="...">
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="tarefas">
+                            <div class="mb-4">
+                                <div class="card">
+                                    <ul class="list-group list-group-flush">
+                                        <?php foreach ($tarefas as $tarefa) : ?>
+                                        <li class="list-group-item p-2">
+                                            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input me-0" type="checkbox" id="tarefa_check1">
+                                                    </div>
+                                                    <div class="ms-3">
+                                                        <p class="mb-0"><span class="text-muted"><?php echo $tarefa['data_final'] ?></span> <?php echo $tarefa['titulo'] ?></p>
+                                                    </div>
+                                                    <div class="ms-2">
+                                                        <span class="badge rounded-pill text-bg-warning"><?php echo $tarefa['tag'] ?></span>
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex flex-row justify-content-end">
+                                                    <button class="btn btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#editarTarefaModal">
+                                                        <i class="bi bi-pen-fill"></i>
+                                                    </button>
+                                                    <button class="btn btn-outline-danger">
+                                                        <i class="bi bi-trash-fill"></i>
+                                                    </button>
+                                                </div>
                                             </div>
-                                            <div class="ms-3">
-                                                <p class="mb-0 font-weight-medium"><?php echo $tarefa['titulo'] ?></p>
+                                        </li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="categoria-tarefas">
+                            <div class="">
+                                <div class="row">
+                                    <div class="col-md-6 mt-2">
+                                        <?php foreach ($tags as $tag) : ?>
+                                        <div class="card shadow-sm">
+                                            <div class="card-header">
+                                                <h5 class="card-title mb-0"><?php echo $tag['titulo'] ?></h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <ul class="list-group list-group-flush">
+                                                    <?php $porCategoria = consultarPorCategoria($conn, $tag['id']); 
+                                                     foreach ($porCategoria as $tarefa) : ?>
+                                                    <li class="list-group-item p-2 bg-light rounded" >
+                                                        <div class="d-flex justify-content-between align-items-center flex-wrap" >
+                                                            <div class="d-flex align-items-center">
+                                                                <div class="form-check">
+                                                                    <input class="form-check-input me-0" type="checkbox" id="tarefa_check1">
+                                                                </div>
+                                                                <div class="ms-3">
+                                                                    <p class="mb-0"><span class="text-muted"><?php echo $tarefa['data_final'] ?></span> <?php echo $tarefa['titulo'] ?></p>
+                                                                </div>
+                                                            </div>
+                                                            <div class="d-flex flex-row justify-content-end">
+                                                                <button class="btn btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#editarTarefaModal">
+                                                                    <i class="bi bi-pen-fill"></i>
+                                                                </button>
+                                                                <button class="btn btn-outline-danger">
+                                                                    <i class="bi bi-trash-fill"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                    <?php endforeach;?>
+                                                </ul>
                                             </div>
                                         </div>
-                                        <div class="d-flex flex-row justify-content-end">
-                                            <button class="btn btn-outline-primary"><i class="bi bi-pen-fill"></i></button>
-                                            <button class="btn btn-outline-danger"><i class="bi bi-trash-fill"></i></button>
-                                        </div>
+                                        <?php endforeach;?>
                                     </div>
-                                </li>
-                                <?php endforeach; ?>
-                            </ul>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de edição -->
+    <div class="modal fade" id="editarTarefaModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editarTarefaModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="editarTarefaModalLabel">Editar Tarefa</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form class="row gy-2 gx-3 align-items-center">
+                        <div class="col-auto">
+                            <input type="text" class="form-control" id="editar_titulo_tarefa" placeholder="Título da Tarefa">
+                        </div>
+                        <div class="col-auto">
+                            <select class="form-select" id="editar_categoria">
+                                <option selected>Categoria</option>
+                                <option value="1">Urgente</option>
+                                <option value="2">Faculdade</option>
+                                <option value="3">Tempo</option>
+                            </select>
+                        </div>
+                        <div class="col-auto">
+                            <label class="text-secondary">Data final</label>
+                            <input type="date" class="form-control" id="editar_data_final">
+                        </div>
+                        <div class="col-auto">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="editar_status_tarefa">
+                                <label class="form-check-label" for="editar_status_tarefa">Concluída</label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Salvar</button>
                 </div>
             </div>
         </div>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous"></script>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
