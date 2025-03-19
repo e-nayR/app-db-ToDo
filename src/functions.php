@@ -1,5 +1,4 @@
 <?php
-
 function dbConn() {
     $host = getenv('DB_HOST');
     $dbname = getenv('DB_NAME');
@@ -25,7 +24,7 @@ function dbConn() {
 
 function consultarTarefas($conn) {
     try{
-        $query = "SELECT t.id as id, t.titulo as titulo, t.data_final as data_final, ta.titulo as tag FROM tarefa as t JOIN tag as ta ON ta.id = t.tag ORDER BY data_final DESC;";
+        $query = "SELECT t.id as id, t.entrege as entregue, t.titulo as titulo, t.data_final as data_final, ta.titulo as tag FROM tarefa as t JOIN tag as ta ON ta.id = t.tag ORDER BY data_final DESC;";
         $tarefas = [];
         $result = pg_query($conn, $query);
         while ($row = pg_fetch_assoc($result)) {
@@ -35,7 +34,7 @@ function consultarTarefas($conn) {
     } catch(Exception $e) {
         echo "Erro: " . $e->getMessage();
     }
-};
+}
 
 function consultarTags($conn) {
     try{
@@ -49,7 +48,7 @@ function consultarTags($conn) {
     } catch(Exception $e) {
         echo "Erro: " . $e->getMessage();
     }
-};
+}
 
 function consultarPorCategoria($conn,$tag_id) {
     try{
@@ -63,15 +62,21 @@ function consultarPorCategoria($conn,$tag_id) {
     } catch(Exception $e) {
         echo "Erro: " . $e->getMessage();
     }
-};
+}
 
-function criarTarefa() {
-    $tarefa_titulo = 'Tarefa 1';
-    $criado = date("Y-m-d H:i:s", time());
-    $final = '';
-    $tag = '1';
-    $tag_titulo = 'Urgente';
-    // $query = "INSERT INTO tarefa(titulo, data_criado, tag) VALUES ('$tarefa_titulo', '$criado', $tag);";
+function criarTarefa($conn, $data) {
+    $tarefa_titulo = isset($data['titulo_tarefa']) ? $data['titulo_tarefa'] : 'null';
+    $criado = date("Y-m-d H:i:s");
+    $final = isset($data['data_final']) ? $data['data_final'].' 00:00:00' : 'null';
+    if ($final == ' 00:00:00'){
+        $final = 'NULL';
+    }
+    $entregue = isset($data['status_tarefa']) ? $data['status_tarefa'] : 'false';
+    $tag = isset($data['categoria']) ? $data['categoria'] : 'null';
+    try{
+        $query = "INSERT INTO tarefa(titulo, data_criado, data_final, entrege, tag) VALUES ('$tarefa_titulo', '$criado', $final, '$entregue', '$tag');";
+        $result = pg_query($conn, $query);
+    } catch(Exception $e) {
+        echo "Erro: " . $e->getMessage();
+    }
 };
-
-?>

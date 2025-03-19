@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -21,6 +21,17 @@ include 'functions.php';
 $conn = dbConn();
 $tarefas = consultarTarefas($conn);
 $tags = consultarTags($conn);
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['criar-tarefa'])) {
+        //echo $_POST['data_final'].' 00:00:00';
+        criarTarefa($conn,$_POST);
+    }
+//    elseif (isset($_POST['editar-tarefa'])) {
+//        echo 'Editou';
+//    }
+}
+
 ?>
 <body>
     <div class="container">
@@ -56,7 +67,6 @@ $tags = consultarTags($conn);
                             </div>
                         </form>
                     </div>
-
                     <!-- tipos de listagem -->
                     <ul class="nav nav-tabs mb-4">
                         <li class="nav-item">
@@ -77,7 +87,7 @@ $tags = consultarTags($conn);
                                             <div class="d-flex justify-content-between align-items-center flex-wrap">
                                                 <div class="d-flex align-items-center">
                                                     <div class="form-check">
-                                                        <input class="form-check-input me-0" type="checkbox" id="tarefa_check1">
+                                                        <input class="form-check-input me-0" type="checkbox" id="tarefa_check1" <?= $tarefa['entregue'] == 't' ? 'checked' : '' ?>>
                                                     </div>
                                                     <div class="ms-3">
                                                         <p class="mb-0"><span class="text-muted"><?php echo $tarefa['data_final'] ?></span> <?php echo $tarefa['titulo'] ?></p>
@@ -87,10 +97,10 @@ $tags = consultarTags($conn);
                                                     </div>
                                                 </div>
                                                 <div class="d-flex flex-row justify-content-end">
-                                                    <button class="btn btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#editarTarefaModal">
+                                                    <button class="btn btn-outline-primary me-1" id="botaoEditar" data-bs-toggle="modal" data-bs-target="#editarTarefaModal">
                                                         <i class="bi bi-pen-fill"></i>
                                                     </button>
-                                                    <button class="btn btn-outline-danger">
+                                                    <button class="btn btn-outline-danger" id="botaoExcluir" data-id="<?php echo $tarefa['id'] ?>">
                                                         <i class="bi bi-trash-fill"></i>
                                                     </button>
                                                 </div>
@@ -102,45 +112,43 @@ $tags = consultarTags($conn);
                             </div>
                         </div>
                         <div class="tab-pane fade" id="categoria-tarefas">
-                            <div class="">
-                                <div class="row">
-                                    <div class="col-md-6 mt-2">
-                                        <?php foreach ($tags as $tag) : ?>
-                                        <div class="card shadow-sm">
-                                            <div class="card-header">
-                                                <h5 class="card-title mb-0"><?php echo $tag['titulo'] ?></h5>
-                                            </div>
-                                            <div class="card-body">
-                                                <ul class="list-group list-group-flush">
-                                                    <?php $porCategoria = consultarPorCategoria($conn, $tag['id']); 
-                                                     foreach ($porCategoria as $tarefa) : ?>
-                                                    <li class="list-group-item p-2 bg-light rounded" >
-                                                        <div class="d-flex justify-content-between align-items-center flex-wrap" >
-                                                            <div class="d-flex align-items-center">
-                                                                <div class="form-check">
-                                                                    <input class="form-check-input me-0" type="checkbox" id="tarefa_check1">
-                                                                </div>
-                                                                <div class="ms-3">
-                                                                    <p class="mb-0"><span class="text-muted"><?php echo $tarefa['data_final'] ?></span> <?php echo $tarefa['titulo'] ?></p>
-                                                                </div>
-                                                            </div>
-                                                            <div class="d-flex flex-row justify-content-end">
-                                                                <button class="btn btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#editarTarefaModal">
-                                                                    <i class="bi bi-pen-fill"></i>
-                                                                </button>
-                                                                <button class="btn btn-outline-danger">
-                                                                    <i class="bi bi-trash-fill"></i>
-                                                                </button>
-                                                            </div>
+                            <div class="row">
+                            <?php foreach ($tags as $tag) : ?>
+                            <div class="col-md-6 mt-2">
+                                <div class="card shadow-sm">
+                                    <div class="card-header">
+                                        <h5 class="card-title mb-0"><?php echo $tag['titulo'] ?></h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-group list-group-flush">
+                                            <?php $porCategoria = consultarPorCategoria($conn, $tag['id']);
+                                             foreach ($porCategoria as $tarefa) : ?>
+                                            <li class="list-group-item p-2 bg-light rounded" >
+                                                <div class="d-flex justify-content-between align-items-center flex-wrap" >
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input me-0" type="checkbox" id="tarefa_check1">
                                                         </div>
-                                                    </li>
-                                                    <?php endforeach;?>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                        <?php endforeach;?>
+                                                        <div class="ms-3">
+                                                            <p class="mb-0"><span class="text-muted"><?php echo $tarefa['data_final'] ?></span> <?php echo $tarefa['titulo'] ?></p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="d-flex flex-row justify-content-end">
+                                                        <button class="btn btn-outline-primary me-1" id="botaoEditar" data-bs-toggle="modal" data-bs-target="#editarTarefaModal">
+                                                            <i class="bi bi-pen-fill"></i>
+                                                        </button>
+                                                        <button class="btn btn-outline-danger" id="botaoExcluir" data-id="<?php echo $tarefa['id'] ?>">
+                                                            <i class="bi bi-trash-fill"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                            <?php endforeach;?>
+                                        </ul>
                                     </div>
                                 </div>
+                            </div>
+                            <?php endforeach;?>
                             </div>
                         </div>
                     </div>
@@ -158,7 +166,7 @@ $tags = consultarTags($conn);
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form class="row gy-2 gx-3 align-items-center">
+                    <form method="post" class="row gy-2 gx-3 align-items-center">
                         <div class="col-auto">
                             <input type="text" class="form-control" id="editar_titulo_tarefa" placeholder="Título da Tarefa">
                         </div>
@@ -180,15 +188,33 @@ $tags = consultarTags($conn);
                                 <label class="form-check-label" for="editar_status_tarefa">Concluída</label>
                             </div>
                         </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary" data-bs-dismiss="modal" id="editar-tarefa" name="editar-tarefa">Salvar</button>
+                        </div>
                     </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Salvar</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <script>
+        document.querySelectorAll('#botaoExcluir').forEach(botao => {
+            botao.addEventListener('click', () => {
+                const id = botao.dataset.id;
+
+                fetch('delete.php', {
+                    method: 'POST',
+                    body: JSON.stringify({ id: id })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            botao.closest('li').remove(); // Remove a linha da tabela
+                        }
+                    });
+            });
+        });
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

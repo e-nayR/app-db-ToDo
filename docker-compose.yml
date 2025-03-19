@@ -8,7 +8,9 @@ services:
       - ./apache/sites-available:/etc/apache2/sites-available
     depends_on:
       - database
+    command: /bin/bash -c "echo 'ServerName localhost' >> /etc/apache2/apache2.conf && apache2-foreground"
     environment:
+      - APACHE_LOG_DIR=/var/log/apache2
       - DB_HOST=database
       - DB_PORT=5432
       - DB_NAME=${DB_NAME}
