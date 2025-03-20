@@ -24,7 +24,7 @@ function dbConn() {
 
 function consultarTarefas($conn) {
     try{
-        $query = "SELECT t.id as id, t.entrege as entregue, t.titulo as titulo, t.data_final as data_final, ta.titulo as tag FROM tarefa as t JOIN tag as ta ON ta.id = t.tag ORDER BY data_final DESC;";
+        $query = "SELECT t.id as id, t.entrege as entregue, t.titulo as titulo, t.data_final as data_final, ta.titulo as tag FROM tarefa as t JOIN tag as ta ON ta.id = t.tag ORDER BY data_final ASC;";
         $tarefas = [];
         $result = pg_query($conn, $query);
         while ($row = pg_fetch_assoc($result)) {
@@ -52,7 +52,7 @@ function consultarTags($conn) {
 
 function consultarPorCategoria($conn,$tag_id) {
     try{
-        $query = "SELECT t.id as id, t.titulo as titulo, t.data_final as data_final FROM tarefa as t WHERE tag=$tag_id ORDER BY data_final DESC;";
+        $query = "SELECT t.id as id, t.entrege as entregue, t.titulo as titulo, t.data_final as data_final FROM tarefa as t WHERE tag=$tag_id ORDER BY data_final DESC;";
         $tarefas = [];
         $result = pg_query($conn, $query);
         while ($row = pg_fetch_assoc($result)) {
@@ -74,9 +74,19 @@ function criarTarefa($conn, $data) {
     $entregue = isset($data['status_tarefa']) ? $data['status_tarefa'] : 'false';
     $tag = isset($data['categoria']) ? $data['categoria'] : 'null';
     try{
-        $query = "INSERT INTO tarefa(titulo, data_criado, data_final, entrege, tag) VALUES ('$tarefa_titulo', '$criado', $final, '$entregue', '$tag');";
+        $query = "INSERT INTO tarefa(titulo, data_criado, data_final, entrege, tag) VALUES ('$tarefa_titulo', '$criado', '$final', '$entregue', '$tag');";
         $result = pg_query($conn, $query);
     } catch(Exception $e) {
         echo "Erro: " . $e->getMessage();
     }
 };
+
+function deletarTarefa($conn, $id)
+{
+    try{
+        $query = "DELETE FROM tarefa WHERE id=$id;";
+        $result = pg_query($conn, $query);
+    } catch(Exception $e) {
+        error_log("Erro: " . $e->getMessage());
+    }
+}

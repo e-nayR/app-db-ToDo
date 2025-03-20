@@ -1,3 +1,27 @@
+<?php
+include 'functions.php';
+
+$conn = dbConn();
+$tarefas = consultarTarefas($conn);
+$tags = consultarTags($conn);
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['criar-tarefa'])) {
+        criarTarefa($conn,$_POST);
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit();
+    }
+    if (isset($_POST['botaoExcluir'])) {
+        deletarTarefa($conn,$_POST['tarefa_id']);
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit();
+    }
+//    elseif (isset($_POST['editar-tarefa'])) {
+//        echo 'Editou';
+//    }
+}
+
+?>
 <!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/html">
 <head>
@@ -15,24 +39,6 @@ body {
     background-color: #f1f5f9;
 }
 </style>
-<?php
-include 'functions.php';
-
-$conn = dbConn();
-$tarefas = consultarTarefas($conn);
-$tags = consultarTags($conn);
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['criar-tarefa'])) {
-        //echo $_POST['data_final'].' 00:00:00';
-        criarTarefa($conn,$_POST);
-    }
-//    elseif (isset($_POST['editar-tarefa'])) {
-//        echo 'Editou';
-//    }
-}
-
-?>
 <body>
     <div class="container">
         <div class="py-4">
@@ -87,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             <div class="d-flex justify-content-between align-items-center flex-wrap">
                                                 <div class="d-flex align-items-center">
                                                     <div class="form-check">
-                                                        <input class="form-check-input me-0" type="checkbox" id="tarefa_check1" <?= $tarefa['entregue'] == 't' ? 'checked' : '' ?>>
+                                                        <input class="form-check-input me-0" type="checkbox" id="tarefa_check" <?= $tarefa['entregue'] == 't' ? 'checked' : '' ?> disabled>
                                                     </div>
                                                     <div class="ms-3">
                                                         <p class="mb-0"><span class="text-muted"><?php echo $tarefa['data_final'] ?></span> <?php echo $tarefa['titulo'] ?></p>
@@ -100,9 +106,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                                     <button class="btn btn-outline-primary me-1" id="botaoEditar" data-bs-toggle="modal" data-bs-target="#editarTarefaModal">
                                                         <i class="bi bi-pen-fill"></i>
                                                     </button>
-                                                    <button class="btn btn-outline-danger" id="botaoExcluir" data-id="<?php echo $tarefa['id'] ?>">
-                                                        <i class="bi bi-trash-fill"></i>
-                                                    </button>
+                                                    <form method="post">
+                                                        <input type="hidden" name="tarefa_id" value="<?php echo $tarefa['id'] ?>" id="tarefa_id">
+                                                        <button class="btn btn-outline-danger" id="botaoExcluir" name="botaoExcluir">
+                                                            <i class="bi bi-trash-fill"></i>
+                                                        </button>
+                                                    </form>
                                                 </div>
                                             </div>
                                         </li>
@@ -127,7 +136,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                                 <div class="d-flex justify-content-between align-items-center flex-wrap" >
                                                     <div class="d-flex align-items-center">
                                                         <div class="form-check">
-                                                            <input class="form-check-input me-0" type="checkbox" id="tarefa_check1">
+                                                            <input class="form-check-input me-0" type="checkbox" id="tarefa_check" <?= $tarefa['entregue'] == 't' ? 'checked' : '' ?> disabled>
                                                         </div>
                                                         <div class="ms-3">
                                                             <p class="mb-0"><span class="text-muted"><?php echo $tarefa['data_final'] ?></span> <?php echo $tarefa['titulo'] ?></p>
@@ -137,9 +146,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                                         <button class="btn btn-outline-primary me-1" id="botaoEditar" data-bs-toggle="modal" data-bs-target="#editarTarefaModal">
                                                             <i class="bi bi-pen-fill"></i>
                                                         </button>
-                                                        <button class="btn btn-outline-danger" id="botaoExcluir" data-id="<?php echo $tarefa['id'] ?>">
-                                                            <i class="bi bi-trash-fill"></i>
-                                                        </button>
+                                                        <form method="post">
+                                                            <input type="hidden" name="tarefa_id" value="<?php echo $tarefa['id'] ?>" id="tarefa_id">
+                                                            <button class="btn btn-outline-danger" id="botaoExcluir" name="botaoExcluir">
+                                                                <i class="bi bi-trash-fill"></i>
+                                                            </button>
+                                                        </form>
                                                     </div>
                                                 </div>
                                             </li>
@@ -198,22 +210,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <script>
-        document.querySelectorAll('#botaoExcluir').forEach(botao => {
-            botao.addEventListener('click', () => {
-                const id = botao.dataset.id;
-
-                fetch('delete.php', {
-                    method: 'POST',
-                    body: JSON.stringify({ id: id })
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            botao.closest('li').remove(); // Remove a linha da tabela
-                        }
-                    });
-            });
-        });
+        // document.querySelectorAll('#botaoExcluir').forEach(botao => {
+        //     botao.addEventListener('click', () => {
+        //         const id = botao.dataset.id;
+        //
+        //         fetch('delete.php', {
+        //             method: 'POST',
+        //             body: JSON.stringify({ id: id })
+        //         })
+        //             .then(response => response.json())
+        //             .then(data => {
+        //                 if (data.success) {
+        //                     botao.closest('li').remove(); // Remove a linha da tabela
+        //                 }
+        //             });
+        //     });
+        // });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
