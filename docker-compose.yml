@@ -7,7 +7,8 @@ services:
       - ./src:/var/www/html
       - ./apache/sites-available:/etc/apache2/sites-available
     depends_on:
-      - database
+      database:
+        condition: service_healthy
     command: /bin/bash -c "echo 'ServerName localhost' >> /etc/apache2/apache2.conf && apache2-foreground"
     environment:
       - APACHE_LOG_DIR=/var/log/apache2
@@ -21,10 +22,16 @@ services:
     image: postgres:15
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./docker/db-init:/docker-entrypoint-initdb.d
     environment:
       - POSTGRES_DB=${DB_NAME}
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
+      interval: 5s
+      timeout: 10s
+      retries: 5
     ports:
       - "5432:5432"
 

@@ -1,0 +1,13 @@
+CREATE TABLE IF NOT EXISTS tag(
+    id SERIAL PRIMARY KEY,
+    titulo VARCHAR(255) NOT NULL
+);
+CREATE TABLE IF NOT EXISTS tarefa(
+    id SERIAL PRIMARY KEY,
+    titulo VARCHAR(255) NOT NULL,
+    data_criado DATE DEFAULT CURRENT_DATE,
+    data_final DATE,
+    concluida BOOLEAN DEFAULT FALSE,
+    tag INT,
+    CONSTRAINT fk_tarefa_tag FOREIGN KEY (tag) REFERENCES tag(id) ON DELETE SET NULL
+);

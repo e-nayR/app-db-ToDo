@@ -1,1 +1,0 @@
-INSERT INTO tarefa(titulo, data_criado, tag) VALUES ('tarefa XX', '2025-03-19 17:18:00-00', 3);
