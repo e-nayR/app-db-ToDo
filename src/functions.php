@@ -24,7 +24,7 @@ function dbConn() {
 
 function consultarTarefas($conn) {
     try{
-        $query = "SELECT t.id as id, t.concluida as concluida, t.titulo as titulo, t.data_final as data_final, ta.titulo as tag FROM tarefa as t LEFT JOIN tag as ta ON ta.id = t.tag ORDER BY data_final ASC;";
+        $query = "SELECT t.id as id, t.concluida as concluida, t.titulo as titulo, t.data_final as data_final, ta.titulo as tag, ta.id as tag_id FROM tarefa as t LEFT JOIN tag as ta ON ta.id = t.tag ORDER BY data_final ASC;";
         $tarefas = [];
         $result = pg_query($conn, $query);
         while ($row = pg_fetch_assoc($result)) {
@@ -79,10 +79,10 @@ function consultarPorTagNull($conn){
 }
 
 function criarTarefa($conn, $data) {
-    $titulo_tarefa = trim($_POST['titulo_tarefa']);
-    $tag_tarefa = isset($_POST['tag_tarefa']) && $_POST['tag_tarefa'] !== '' ? $_POST['tag_tarefa'] : NULL;
-    $data_final = isset($_POST['data_final']) && $_POST['data_final'] !== '' ? $_POST['data_final'] : NULL;
-    $tarefa_concluida = isset($_POST['tarefa_concluida']) ? 'TRUE' : 'FALSE';
+    $titulo_tarefa = $_POST['tituloTarefa'];
+    $tag_tarefa = $_POST['tagTarefa'] !== '' ? $_POST['tagTarefa'] : NULL;
+    $data_final = $_POST['dataFinal'] !== '' ? $_POST['dataFinal'] : NULL;
+    $tarefa_concluida = isset($_POST['tarefaConcluida']) ? 'TRUE' : 'FALSE';
 
     $sql = "INSERT INTO tarefa (titulo, data_final, concluida, tag) 
         VALUES ($1, $2, $3, $4)";
@@ -92,23 +92,6 @@ function criarTarefa($conn, $data) {
     if (!$result) {
         echo "Erro ao cadastrar tarefa: " . pg_last_error($conn);
     }
-
-//    $titulo = $data['titulo_tarefa'] !== '' ? "'" . $data['titulo_tarefa'] . "'" : 'NULL'; // PHP 7+ (null coalescing)
-//    $criado = date("Y-m-d");
-//    $final = $data['data_final'] !== '' ? "'" . $data['data_final'] . "'" : 'NULL';
-//    $concluida = isset($data['tarefa_concluida']) ? ($data['tarefa_concluida'] !== '' ? 'TRUE' : 'FALSE' ) : 'FALSE';
-//    $tag = $data['tag_tarefa'] !== '' ? "'" . $data['tag_tarefa'] . "'" : 'NULL';
-//    try {
-//        $query = "INSERT INTO tarefa(titulo, data_criado, data_final, concluida, tag)
-//                  VALUES ($titulo, '$criado', $final, $concluida, $tag)";
-//        $result = pg_query($conn, $query);
-//
-//        if (!$result) {
-//            throw new Exception(pg_last_error($conn));
-//        }
-//    } catch(Exception $e) {
-//        echo "Erro: " . $e->getMessage();
-//    }
 }
 
 function deletarTarefa($conn, $id)
@@ -118,15 +101,6 @@ function deletarTarefa($conn, $id)
         $result = pg_query($conn, $query);
     } catch(Exception $e) {
         error_log("Erro: " . $e->getMessage());
-    }
-}
-
-function consultarTarefa($conn, $id) {
-    try{
-        $query = "SELECT t.id as id, t.concluida as concluida, t.titulo as titulo, t.data_final as data_final, ta.titulo as tag FROM tarefa as t JOIN tag as ta ON ta.id = t.tag WHERE t.id = $id;";
-        return pg_query($conn, $query);
-    } catch(Exception $e) {
-        echo "Erro: " . $e->getMessage();
     }
 }
 
@@ -153,10 +127,32 @@ function deletarTag($conn, $id)
     }
 }
 
-function consultarTag($conn, $id) {
+function editarTag($conn, $data) {
+    $id = $data['idTag'];
+    $titulo = $data['editarTituloTag'];
     try{
-        $query = "SELECT * FROM tag WHERE id=$id;";
-        return pg_query($conn, $query);
+        $sql = "UPDATE tag SET titulo = $1 WHERE id=$2;";
+        $result = pg_query_params($conn, $sql, [$titulo, $id]);
+        if (!$result) {
+            throw new Exception(pg_last_error($conn));
+        }
+    } catch(Exception $e) {
+        echo "Erro: " . $e->getMessage();
+    }
+}
+
+function editarTarefa($conn, $data){
+    $id = $data['tarefaId'];
+    $titulo_tarefa = $data['editarTituloTarefa'];
+    $tag_tarefa = $data['editarTagTarefa'] !== '' ? $data['editarTagTarefa'] : NULL;
+    $data_final = $data['editarDataFinal'] !== '' ? $data['editarDataFinal'] : NULL;
+    $tarefa_concluida = isset($data['editarTarefaConcluida']) ? 'TRUE' : 'FALSE';
+    try{
+        $sql = "UPDATE tarefa SET titulo=$1, data_final=$2, concluida=$3, tag=$4 WHERE id=$5;";
+        $result = pg_query_params($conn, $sql, [$titulo_tarefa, $data_final, $tarefa_concluida, $tag_tarefa, $id]);
+        if (!$result) {
+            throw new Exception(pg_last_error($conn));
+        }
     } catch(Exception $e) {
         echo "Erro: " . $e->getMessage();
     }

@@ -7,33 +7,38 @@ $tags = consultarTags($conn);
 
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['criar-tarefa'])) {
-//        print_r($_POST);
+    if (isset($_POST['criarTarefa'])) {
         criarTarefa($conn,$_POST);
         header("Location: " . $_SERVER['PHP_SELF']);
         exit();
     }
     if (isset($_POST['btnModalExcluirTarefa'])) {
-        deletarTarefa($conn,$_POST['tarefa_id']);
+        deletarTarefa($conn,$_POST['tarefaId']);
         header("Location: " . $_SERVER['PHP_SELF']);
         exit();
     }
-    if (isset($_POST['criar-tag'])) {
-        criarTag($conn,$_POST['tag_titulo']);
+    if (isset($_POST['criarTag'])) {
+        criarTag($conn,$_POST['tagTitulo']);
         header("Location: " . $_SERVER['PHP_SELF']);
         exit();
     }
     if (isset($_POST['btnModalExcluirTag'])) {
-        deletarTag($conn,$_POST['tag_id']);
+        deletarTag($conn,$_POST['tagId']);
         header("Location: " . $_SERVER['PHP_SELF']);
         exit();
     }
-//    if (isset($_POST['btnModalEditarTarefa'])) {
-//        print_r($_POST);
-//        consultarTarefa($conn,$_POST['tarefa_id']);
-//        header("Location: " . $_SERVER['PHP_SELF']);
-//        exit();
-//    }
+    if (isset($_POST['editarTag'])) {
+        editarTag($conn,$_POST);
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit();
+    }
+    if (isset($_POST['editarTarefa'])) {
+        unset($_POST['editarTarefa']);
+        editarTarefa($conn,$_POST);
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit();
+    }
+
 }
 
 ?>
@@ -84,29 +89,29 @@ body {
                             <div class="row align-items-center mb-2">
                                 <form method="POST" class="row gy-2 gx-3 align-items-center">
                                     <div class="col-auto">
-                                        <input type="text" class="form-control" id="titulo_tarefa" name="titulo_tarefa" placeholder="Título da Tarefa" required>
+                                        <input type="text" class="form-control" id="tituloTarefa" name="tituloTarefa" placeholder="Título da Tarefa" required>
                                     </div>
                                     <div class="col-auto">
                                         <label class="text-secondary">Tag</label>
-                                        <select class="form-select" id="tag_tarefa" name="tag_tarefa">
+                                        <select class="form-select" id="tagTarefa" name="tagTarefa">
                                             <option value="">Selecione</option>
                                             <?php foreach ($tags as $tag) : ?>
-                                                <option value="<?php echo $tag['id'] ?>"><?php echo $tag['titulo'] ?></option>
+                                                <option value="<?= $tag['id'] ?>"><?= $tag['titulo'] ?></option>
                                             <?php endforeach; ?>
                                         </select>
                                     </div>
                                     <div class="col-auto">
                                         <label class="text-secondary">Data final</label>
-                                        <input type="date" class="form-control" id="data_final" name="data_final">
+                                        <input type="date" class="form-control" id="dataFinal" name="dataFinal">
                                     </div>
                                     <div class="col-auto">
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" id="tarefa_concluida" name="tarefa_concluida">
-                                            <label class="form-check-label" for="tarefa_concluida">Concluída</label>
+                                            <input class="form-check-input" type="checkbox" id="tarefaConcluida" name="tarefaConcluida">
+                                            <label class="form-check-label" for="tarefaConcluida">Concluída</label>
                                         </div>
                                     </div>
                                     <div class="col-auto">
-                                        <button type="submit" class="btn btn-outline-success" id="criar-tarefa" name="criar-tarefa">Criar</button>
+                                        <button type="submit" class="btn btn-outline-success" id="criarTarefa" name="criarTarefa">Criar</button>
                                     </div>
                                 </form>
                             </div>
@@ -116,7 +121,7 @@ body {
                                     <button class="nav-link active" id="lista-todas" data-bs-toggle="tab" data-bs-target="#tarefas">Todas</button>
                                 </li>
                                 <li class="nav-item">
-                                    <button class="nav-link" id="lista-tag" data-bs-toggle="tab" data-bs-target="#lista_tag_tarefas">Por tag</button>
+                                    <button class="nav-link" id="lista-tag" data-bs-toggle="tab" data-bs-target="#listaTagTarefas">Por tag</button>
                                 </li>
                             </ul>
 
@@ -130,21 +135,21 @@ body {
                                                         <div class="d-flex justify-content-between align-items-center flex-wrap">
                                                             <div class="d-flex align-items-center">
                                                                 <div class="form-check">
-                                                                    <input class="form-check-input me-0" type="checkbox" id="tarefa_check" <?= $tarefa['concluida'] == 't' ? 'checked' : '' ?> disabled>
+                                                                    <input class="form-check-input me-0" type="checkbox" id="tarefaCheck" <?= $tarefa['concluida'] == 't' ? 'checked' : '' ?> disabled>
                                                                 </div>
                                                                 <div class="ms-3">
-                                                                    <p class="mb-0"><span class="text-muted"><?php echo $tarefa['data_final'] ?></span> <?php echo $tarefa['titulo'] ?></p>
+                                                                    <p class="mb-0"><span class="text-muted"><?= $tarefa['data_final'] ?></span> <?= $tarefa['titulo'] ?></p>
                                                                 </div>
                                                                 <div class="ms-2">
-                                                                    <span class="badge rounded-pill text-bg-warning"><?php echo $tarefa['tag'] ?></span>
+                                                                    <span class="badge rounded-pill text-bg-warning"><?= $tarefa['tag'] ?></span>
                                                                 </div>
                                                             </div>
                                                             <div class="d-flex flex-row justify-content-end">
-                                                                <button class="btn btn-outline-primary me-1" id="btnModalEditarTarefa" data-id="<?php echo $tarefa['id'] ?>" data-bs-toggle="modal" data-bs-target="#editarTarefaModal">
+                                                                <button class="btn btn-outline-primary me-1" id="btnModalEditarTarefa" data-id="<?= $tarefa['id'] ?>" data-bs-toggle="modal" data-bs-target="#editarTarefaModal<?= $tarefa['id']?>">
                                                                     <i class="bi bi-pen-fill"></i>
                                                                 </button>
                                                                 <form method="post">
-                                                                    <input type="hidden" name="tarefa_id" value="<?php echo $tarefa['id'] ?>" id="tarefa_id">
+                                                                    <input type="hidden" name="tarefaId" value="<?= $tarefa['id'] ?>" id="tarefaId">
                                                                     <button class="btn btn-outline-danger" id="btnModalExcluirTarefa" name="btnModalExcluirTarefa">
                                                                         <i class="bi bi-trash-fill"></i>
                                                                     </button>
@@ -157,13 +162,13 @@ body {
                                         </div>
                                     </div>
                                 </div>
-                                <div class="tab-pane fade" id="lista_tag_tarefas">
+                                <div class="tab-pane fade" id="listaTagTarefas">
                                     <div class="row">
                                         <?php foreach ($tags as $tag) : ?>
                                             <div class="col-md-6 mt-2">
                                                 <div class="card shadow-sm">
                                                     <div class="card-header">
-                                                        <h5 class="card-title mb-0"><?php echo $tag['titulo'] ?></h5>
+                                                        <h5 class="card-title mb-0"><?= $tag['titulo'] ?></h5>
                                                     </div>
                                                     <div class="card-body">
                                                         <ul class="list-group list-group-flush">
@@ -173,18 +178,18 @@ body {
                                                                     <div class="d-flex justify-content-between align-items-center flex-wrap" >
                                                                         <div class="d-flex align-items-center">
                                                                             <div class="form-check">
-                                                                                <input class="form-check-input me-0" type="checkbox" id="tarefa_check" <?= $tarefa['concluida'] == 't' ? 'checked' : '' ?> disabled>
+                                                                                <input class="form-check-input me-0" type="checkbox" id="tarefaCheck" <?= $tarefa['concluida'] == 't' ? 'checked' : '' ?> disabled>
                                                                             </div>
                                                                             <div class="ms-3">
-                                                                                <p class="mb-0"><span class="text-muted"><?php echo $tarefa['data_final'] ?></span> <?php echo $tarefa['titulo'] ?></p>
+                                                                                <p class="mb-0"><span class="text-muted"><?= $tarefa['data_final'] ?></span> <?= $tarefa['titulo'] ?></p>
                                                                             </div>
                                                                         </div>
                                                                         <div class="d-flex flex-row justify-content-end">
-                                                                            <button class="btn btn-outline-primary me-1" id="btnModalEditarTarefa" data-bs-toggle="modal" data-bs-target="#editarTarefaModal">
+                                                                            <button class="btn btn-outline-primary me-1" id="btnModalEditarTarefa" data-bs-toggle="modal" data-bs-target="#editarTarefaModal<?= $tarefa['id']?>">
                                                                                 <i class="bi bi-pen-fill"></i>
                                                                             </button>
                                                                             <form method="post">
-                                                                                <input type="hidden" name="tarefa_id" value="<?php echo $tarefa['id'] ?>" id="tarefa_id">
+                                                                                <input type="hidden" name="tarefaId" value="<?= $tarefa['id'] ?>" id="tarefaId">
                                                                                 <button class="btn btn-outline-danger" id="btnModalExcluirTarefa" name="btnModalExcluirTarefa">
                                                                                     <i class="bi bi-trash-fill"></i>
                                                                                 </button>
@@ -211,18 +216,18 @@ body {
                                                                 <div class="d-flex justify-content-between align-items-center flex-wrap" >
                                                                     <div class="d-flex align-items-center">
                                                                         <div class="form-check">
-                                                                            <input class="form-check-input me-0" type="checkbox" id="tarefa_check" <?= $tarefa['concluida'] == 't' ? 'checked' : '' ?> disabled>
+                                                                            <input class="form-check-input me-0" type="checkbox" id="tarefaCheck" <?= $tarefa['concluida'] == 't' ? 'checked' : '' ?> disabled>
                                                                         </div>
                                                                         <div class="ms-3">
-                                                                            <p class="mb-0"><span class="text-muted"><?php echo $tarefa['data_final'] ?></span> <?php echo $tarefa['titulo'] ?></p>
+                                                                            <p class="mb-0"><span class="text-muted"><?= $tarefa['data_final'] ?></span> <?= $tarefa['titulo'] ?></p>
                                                                         </div>
                                                                     </div>
                                                                     <div class="d-flex flex-row justify-content-end">
-                                                                        <button class="btn btn-outline-primary me-1" id="btnModalEditarTarefa" data-bs-toggle="modal" data-bs-target="#editarTarefaModal">
+                                                                        <button class="btn btn-outline-primary me-1" id="btnModalEditarTarefa" data-bs-toggle="modal" data-bs-target="#editarTarefaModal<?= $tarefa['id']?>">
                                                                             <i class="bi bi-pen-fill"></i>
                                                                         </button>
                                                                         <form method="post">
-                                                                            <input type="hidden" name="tarefa_id" value="<?php echo $tarefa['id'] ?>" id="tarefa_id">
+                                                                            <input type="hidden" name="tarefaId" value="<?= $tarefa['id'] ?>" id="tarefaId">
                                                                             <button class="btn btn-outline-danger" id="btnModalExcluirTarefa" name="btnModalExcluirTarefa">
                                                                                 <i class="bi bi-trash-fill"></i>
                                                                             </button>
@@ -245,10 +250,10 @@ body {
                             <div class="row align-items-center mb-2">
                                 <form method="post" class="row gy-2 gx-3 align-items-center">
                                     <div class="col-auto">
-                                        <input type="text" class="form-control" id="tag_titulo" name="tag_titulo" placeholder="Título da Tag" required>
+                                        <input type="text" class="form-control" id="tagTitulo" name="tagTitulo" placeholder="Título da Tag" required>
                                     </div>
                                     <div class="col-auto">
-                                        <button type="submit" class="btn btn-outline-success" data-bs-dismiss="modal" id="criar-tag" name="criar-tag">Criar</button>
+                                        <button type="submit" class="btn btn-outline-success" data-bs-dismiss="modal" id="criarTag" name="criarTag">Criar</button>
                                     </div>
                                 </form>
                             </div>
@@ -260,15 +265,15 @@ body {
                                                 <div class="d-flex justify-content-between align-items-center flex-wrap">
                                                     <div class="d-flex align-items-center">
                                                         <div class="ms-3">
-                                                            <p class="mb-0"><?php echo $tag['titulo'] ?></p>
+                                                            <p class="mb-0"><?= $tag['titulo'] ?></p>
                                                         </div>
                                                     </div>
                                                     <div class="d-flex flex-row justify-content-end">
-                                                        <button class="btn btn-outline-primary me-1" id="btnModalEditarTag" data-id="<?php echo $tag['id'] ?>" data-bs-toggle="modal" data-bs-target="#editarTagModal">
+                                                        <button class="btn btn-outline-primary me-1" id="btnModalEditarTag"  data-bs-toggle="modal" data-bs-target="#editarTagModal<?= $tag['id']?>">
                                                             <i class="bi bi-pen-fill"></i>
                                                         </button>
                                                         <form method="post">
-                                                            <input type="hidden" name="tag_id" value="<?php echo $tag['id'] ?>" id="tag_id">
+                                                            <input type="hidden" name="tagId" value="<?= $tag['id'] ?>" id="tagId">
                                                             <button class="btn btn-outline-danger" id="btnModalExcluirTag" name="btnModalExcluirTag">
                                                                 <i class="bi bi-trash-fill"></i>
                                                             </button>
@@ -287,8 +292,8 @@ body {
         </div>
     </div>
 
-    <!-- Modal de edição -->
-    <div class="modal fade" id="editarTarefaModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editarTarefaModalLabel" aria-hidden="true">
+    <?php foreach ($tarefas as $tarefa) : ?>
+    <div class="modal fade" id="editarTarefaModal<?= $tarefa['id']?>" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editarTarefaModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -298,24 +303,25 @@ body {
                 </div>
                 <div class="modal-body">
                     <form method="post" class="row gy-2 gx-3 align-items-center">
+                        <input type="hidden" name="tarefaId" value="<?= $tarefa['id'] ?>" id="tarefaId">
                         <div class="col-auto">
-                            <input type="text" class="form-control" id="editarTituloTarefa" placeholder="Título da Tarefa">
+                            <input type="text" class="form-control" id="editarTituloTarefa" name="editarTituloTarefa" value="<?= $tarefa['titulo']?>" placeholder="Título da Tarefa">
                         </div>
                         <div class="col-auto">
-                            <select class="form-select" id="editarTag">
+                            <select class="form-select" id="editarTagTarefa" name="editarTagTarefa">
                                 <option value="">Selecione</option>
                                 <?php foreach ($tags as $tag) : ?>
-                                    <option value="<?php echo $tag['id'] ?>"><?php echo $tag['titulo'] ?></option>
+                                    <option value="<?= $tag['id'] ?>" <?= ($tag['id'] == $tarefa['tag_id'] ? 'selected' : '' ) ?>><?= $tag['titulo'] ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
                         <div class="col-auto">
                             <label class="text-secondary">Data final</label>
-                            <input type="date" class="form-control" id="editarDataFinal">
+                            <input type="date" class="form-control" id="editarDataFinal" name="editarDataFinal" value="<?= $tarefa['data_final']?>">
                         </div>
                         <div class="col-auto">
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="editarTarefaConcluida">
+                                <input class="form-check-input" type="checkbox" id="editarTarefaConcluida" name="editarTarefaConcluida" <?= $tarefa['concluida'] == 't' ? 'checked' : '' ?>>
                                 <label class="form-check-label" for="editarTarefaConcluida">Concluída</label>
                             </div>
                         </div>
@@ -327,8 +333,10 @@ body {
             </div>
         </div>
     </div>
+    <?php endforeach; ?>
 
-    <div class="modal fade" id="editarTagModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editarTagModalLabel" aria-hidden="true">
+    <?php foreach ($tags as $tag) : ?>
+    <div class="modal fade" id="editarTagModal<?= $tag['id']?>" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editarTagModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -338,8 +346,9 @@ body {
                 </div>
                 <div class="modal-body">
                     <form method="post" class="row gy-2 gx-3 align-items-center">
+                        <input type="hidden" name="idTag" value="<?= $tag['id'] ?>" id="idTag">
                         <div class="col-auto">
-                            <input type="text" class="form-control" id="editarTituloTag" name="editarTituloTag" placeholder="Título da Tarefa">
+                            <input type="text" class="form-control" id="editarTituloTag" name="editarTituloTag" value="<?= $tag['titulo']?>" placeholder="Título da Tarefa">
                         </div>
                         <div class="col-auto">
                             <button type="submit" class="btn btn-primary" data-bs-dismiss="modal" id="editarTag" name="editarTag">Salvar</button>
@@ -349,6 +358,7 @@ body {
             </div>
         </div>
     </div>
+    <?php endforeach; ?>
     <script>
         modalTarefa = document.querySelector("#idTarefaEditar");
         modalTag = document.querySelector("#idTagEditar");
