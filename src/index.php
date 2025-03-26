@@ -57,16 +57,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 body {
     background-color: #eeeff1;
 }
+
+.nav-tabs .nav-link {
+    border: none;
+    color: #000000;
+    background-color: transparent;
+}
+
+.tipos-listas .nav-link.active {
+    font-weight: bold;
+    border-bottom: 3px solid #597eb4;
+    color: #597eb4;
+    background-color: transparent;
+}
+.nav-tabs .nav-link:hover {
+    color: #597eb4;
+}
+nav {
+    .nav-tabs .nav-link.active {
+        font-weight: bold;
+        color: #597eb4;
+        background-color: #b9cae5;
+        border-radius: 20px;
+    }
+    .nav-tabs .nav-link {
+        border: none;
+        color: #000000;
+        background-color: transparent;
+    }
+}
+
+
 </style>
 <body>
-    <nav class="navbar navbar-expand-lg bg-primary-subtle">
+    <nav class="navbar navbar-expand-lg bg-primary-subtle position-relative">
         <div class="container-fluid">
-            <span class="navbar-brand">Minhas Tarefas</span>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-brand position-absolute start-50 translate-middle-x">Minhas Tarefas</span>
+            <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarContent">
-                <ul class="nav nav-tabs me-auto mb-2 mb-lg-0" role="tablist">
+                <ul class="nav nav-tabs ms-auto" role="tablist">
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active" id="tab-tarefas" data-bs-toggle="tab" data-bs-target="#conteudoTarefas" type="button"
                                 role="tab" aria-controls="conteudoTarefas" aria-selected="true">Tarefas</button>
@@ -116,7 +147,7 @@ body {
                                 </form>
                             </div>
                             <!-- tipos de listagem -->
-                            <ul class="nav nav-tabs mb-4">
+                            <ul class="tipos-listas nav nav-tabs mb-4">
                                 <li class="nav-item">
                                     <button class="nav-link active" id="lista-todas" data-bs-toggle="tab" data-bs-target="#tarefas">Todas</button>
                                 </li>
