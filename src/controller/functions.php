@@ -142,7 +142,7 @@ function editarTag($conn, $data) {
 }
 
 function editarTarefa($conn, $data){
-    $id = $data['tarefaId'];
+    $id = $data['idTarefa'];
     $titulo_tarefa = $data['editarTituloTarefa'];
     $tag_tarefa = $data['editarTagTarefa'] !== '' ? $data['editarTagTarefa'] : NULL;
     $data_final = $data['editarDataFinal'] !== '' ? $data['editarDataFinal'] : NULL;
